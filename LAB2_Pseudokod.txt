@@ -1,0 +1,42 @@
+Hårdvaran
+UART:
+Base : ff201000
+Control reg: UART_BASE + 4
+
+7-Segment Displays Parallel Port
+HEX 3 - 0 : 0xFF200020
+
+init:
+    counter = 0
+    displayHex(counter)
+
+update_counter(counter,x):
+    if x == '+':
+        return(counter + 1) & 0xF
+    if x == '-':
+        return(counter - 1) & 0xF
+    else:
+        return counter
+
+display_hex(counter):
+    pattern = segLUT[counter]
+    WRITE32(HEX3_0_BASE, pattern)
+
+poll_uart_char():
+    data = read32(UART_BASE + 0)
+
+    if RVALID-bit = 0:
+        return none
+
+    return(data & 0xFF) //ASCII byte 
+
+main loop(polling):
+    x = poll_uart_char() // om något har flaggat(knapptryck)
+    if x == none:
+        Continue  //inget har flaggat
+
+    old = counter
+    counter = update_counter(counter)
+
+    if counter != old:
+        displayHex(counter)
